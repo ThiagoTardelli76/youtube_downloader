@@ -48,7 +48,7 @@ export default function Home() {
       setVideoData(data.data);
     } catch (error) {
       console.error("Erro ao buscar vídeo:", error);
-      alert(error.message);
+      alert("Erro ao buscar video");
     }
   };
 
