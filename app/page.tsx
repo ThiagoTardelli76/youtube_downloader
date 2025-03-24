@@ -53,7 +53,7 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/video/info?url=${encodeURIComponent(url)}&fields=${fields.join(",")}`, {
+      const response = await fetch(`https://thiagotardelli76-github-io.onrender.com/video/info?url=${encodeURIComponent(url)}&fields=${fields.join(",")}`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -76,7 +76,7 @@ export default function Home() {
 
   const getToken = async () => {
     try {
-      const response = await fetch("http://localhost:8080/auth/generate-simple-token", {
+      const response = await fetch("https://thiagotardelli76-github-io.onrender.com/auth/generate-simple-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({})
