@@ -2,12 +2,33 @@
 
 import { useState } from "react";
 
+interface VideoData {
+  title: string;
+  channel: {
+    name: string;
+    channel_url: string;
+    photo_url: string;
+  };
+  thumbnail: {
+    url: string;
+    width: number;
+    height: number;
+  };
+  formats: Array<{
+    format: string;
+    qualityVideo?: string;
+    qualityAudio?: string;
+    hasAudio: boolean;
+    url: string;
+  }>;
+}
+
 export default function Home() {
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState(false);
   const [channel, setChannel] = useState(false);
   const [thumbnail, setThumbnail] = useState(false);
-  const [videoData, setVideoData] = useState(null);
+  const [videoData, setVideoData] = useState<VideoData | null>(null);
 
   const handleDownload = async () => {
     if (!url.trim()) {
@@ -27,7 +48,7 @@ export default function Home() {
     if (thumbnail) fields.push("thumbnail");
 
     if (fields.length === 0) {
-      alert("Selecione pelo menos um campo.");
+      alert("Selecione pelo menos um campo (Título, Canal, Thumbnail).");
       return;
     }
 
@@ -45,10 +66,11 @@ export default function Home() {
         throw new Error("Erro ao buscar os dados do vídeo.");
       }
 
-      setVideoData(data.data);
+      console.log("Vídeo encontrado:", data.data);
+      setVideoData(data.data);  // Atualiza o estado com os dados do vídeo
     } catch (error) {
       console.error("Erro ao buscar vídeo:", error);
-      alert("Erro ao buscar video");
+      alert("Erro ao buscar os dados do vídeo.");
     }
   };
 
@@ -74,108 +96,111 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-6">
-      {/* Header */}
-      <h1 className="text-4xl font-bold text-red-500 mb-6 text-center">
-        Baixe vídeos do YouTube
-      </h1>
-
-      {/* Entrada de URL */}
-      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg">
+    <div className="grid grid-collums-[20px_4fr_20px] items-center justify-items-center p-10 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-roboto)]">
+      <div className="flex gap-6 items-center flex-col sm:flex-collums">
+        <p className="text-3xl text-center sm:text-left font-[family-name:var(--font-roboto)]">
+          Faça o download de vídeos do YouTube
+        </p>
+        <h1>
+          1. Insira o url do video
+        </h1>
         <input
           type="text"
-          placeholder="Cole o link do vídeo..."
-          className="flex-1 p-3 border border-gray-600 bg-gray-800 rounded-lg text-white focus:outline-none focus:border-red-500"
+          placeholder="Cole seu link aqui"
+          className="border border-transparent-300 focus:outline-none rounded px-4 py-2 sm:w-130"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
+        <h2>
+          2. Selecione o que deseja exibir
+        </h2>
+        <div className="flex gap-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="title">Título</label>
+            <input type="checkbox" id="title" checked={title} onChange={(e) => setTitle(e.target.checked)} />
+          </div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="channel">Canal</label>
+            <input type="checkbox" id="channel" checked={channel} onChange={(e) => setChannel(e.target.checked)} />
+          </div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="thumbnail">Thumbnail</label>
+            <input type="checkbox" id="thumbnail" checked={thumbnail} onChange={(e) => setThumbnail(e.target.checked)} />
+          </div>
+        </div>
+
         <button
           onClick={handleDownload}
-          className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
+          className="border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#ffffff] hover:border-[#ff0000] hover:text-[#ff0000] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
         >
-          Buscar 
+          Buscar
         </button>
       </div>
 
-      {/* Opções de seleção */}
-      <div className="mt-4 flex gap-4">
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={title} onChange={(e) => setTitle(e.target.checked)} />
-          Título
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={channel} onChange={(e) => setChannel(e.target.checked)} />
-          Canal
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={thumbnail} onChange={(e) => setThumbnail(e.target.checked)} />
-          Thumbnail
-        </label>
-      </div>
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start mt:10">
+        {videoData && (
+          <div className="p-4 border border-gray-300 rounded-lg mt-6">
+            {/* Título do vídeo */}
+            {videoData.title && <h2 className="text-xl font-bold mb-3">{videoData.title}</h2>}
 
-      {/* Exibição dos dados do vídeo */}
-      {videoData && (
-        <div className="bg-gray-800 p-6 mt-6 rounded-lg shadow-lg w-full max-w-lg">
-          {/* Título do vídeo */}
-          {videoData.title && <h2 className="text-xl font-bold mb-3">{videoData.title}</h2>}
-
-          {/* Informações do canal */}
-          {videoData.channel && (
-            <div className="flex items-center gap-4">
-              <img
-                src={videoData.channel.photo_url}
-                alt={`Foto do canal ${videoData.channel.name}`}
-                className="w-12 h-12 rounded-full"
-              />
-              <div>
-                <p className="text-lg font-medium">{videoData.channel.name}</p>
-                <a
-                  href={videoData.channel.channel_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 underline"
-                >
-                  Visitar canal
-                </a>
+            {/* Informações do canal */}
+            {videoData.channel && (
+              <div className="flex items-center gap-4">
+                <img
+                  src={videoData.channel.photo_url}
+                  alt={`Foto do canal ${videoData.channel.name}`}
+                  className="w-12 h-12 rounded-full"
+                />
+                <div>
+                  <p className="text-lg font-medium">{videoData.channel.name}</p>
+                  <a
+                    href={videoData.channel.channel_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    Visitar canal
+                  </a>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Thumbnail do vídeo */}
-          {videoData.thumbnail && (
-            <div className="mt-4">
-              <img
-                src={videoData.thumbnail.url}
-                alt="Thumbnail do vídeo"
-                className="rounded-lg shadow-lg"
-              />
-            </div>
-          )}
+            {/* Exibir thumbnail do vídeo */}
+            {videoData.thumbnail && (
+              <div className="mt-4">
+                <img
+                  src={videoData.thumbnail.url}
+                  alt="Thumbnail do vídeo"
+                  className="rounded-lg shadow-lg"
+                />
+              </div>
+            )}
 
-          {/* Lista de formatos disponíveis */}
-          {videoData.formats && (
-            <div className="mt-4">
-              <h3 className="font-semibold">Formatos disponíveis:</h3>
-              <ul className="mt-2 space-y-2">
-                {videoData.formats
-                  .filter(format => format.hasAudio) // Apenas formatos com áudio
-                  .map((format, index) => (
-                    <li key={index} className="p-2 border border-gray-600 rounded-lg">
-                      <a
-                        href={format.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 font-medium"
-                      >
-                        {format.format} - {format.qualityVideo || format.qualityAudio}
-                      </a>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
+            {/* Exibir formatos disponíveis */}
+            {videoData.formats && (
+              <div className="mt-4">
+                <h3 className="font-semibold">Formatos disponíveis:</h3>
+                <ul className="list-disc list-inside">
+                  {videoData.formats
+                    .filter(format => format.hasAudio) // Apenas formatos com áudio
+                    .map((format, index) => (
+                      <li key={index}>
+                        <a
+                          href={format.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 underline"
+                        >
+                          {format.format} - {format.qualityVideo || format.qualityAudio}
+                        </a>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
